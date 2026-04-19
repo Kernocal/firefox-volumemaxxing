@@ -1,0 +1,7 @@
+.env
+.env.*
+.output
+.wxt
+node_modules
+package
+store
