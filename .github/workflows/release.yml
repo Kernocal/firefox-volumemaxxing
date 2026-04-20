@@ -1,0 +1,146 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        type: boolean
+        default: false
+        description: Dry run (no commit, no tag, no submission)
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate
+    uses: ./.github/workflows/validate.yml
+    secrets: inherit
+
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    needs: [validate]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Configure Git
+        run: |
+          git config user.email "github-actions@users.noreply.github.com"
+          git config user.name "GitHub Actions"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Detect First Release
+        id: detect
+        run: |
+          if git tag -l 'v*' | grep -q .; then
+            echo "first=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "first=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump Version
+        if: steps.detect.outputs.first == 'false'
+        id: bump
+        run: |
+          pnpm dlx changelogen@latest --bump
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Get Current Version
+        if: steps.detect.outputs.first == 'true'
+        id: current
+        run: |
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          pnpm dlx changelogen@latest --r "$NEW_VERSION" --output CHANGELOG.md --no-bump
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Set Version
+        id: version
+        run: echo "value=${{ steps.bump.outputs.version || steps.current.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Check Tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.value }}" >/dev/null 2>&1; then
+            echo "::error::Tag v${{ steps.version.outputs.value }} already exists"
+            exit 1
+          fi
+
+      - name: Build Zip
+        run: pnpm run zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          path: .output/*.zip
+          if-no-files-found: error
+          include-hidden-files: true
+
+      - name: Commit and Push
+        if: ${{ !inputs.dryRun }}
+        run: |
+          git add package.json CHANGELOG.md
+          git commit -m "chore(release): v${{ steps.version.outputs.value }} [skip ci]"
+          git tag "v${{ steps.version.outputs.value }}"
+          git push
+          git push --tags
+
+      - name: Create GitHub Release
+        if: ${{ !inputs.dryRun }}
+        run: pnpm dlx changelogen@latest gh release ${{ steps.version.outputs.value }} --token ${{ github.token }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Upload Release Assets
+        if: ${{ !inputs.dryRun }}
+        run: gh release upload "v${{ steps.version.outputs.value }}" .output/*.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Submit to Firefox Add-ons
+        if: ${{ steps.detect.outputs.first == 'false' && !inputs.dryRun && inputs.submitFirefox }}
+        id: firefox
+        continue-on-error: true
+        run: |
+          pnpm publish-extension \
+            --firefox-zip .output/*-firefox.zip \
+            --firefox-sources-zip .output/*-sources.zip
+        env:
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}
+
+      - name: Submission Summary
+        if: ${{ steps.detect.outputs.first == 'false' && !inputs.dryRun }}
+        run: |
+          echo "### Store Submissions" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Firefox: ${{ steps.firefox.outcome }}" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ steps.firefox.outcome }}" == "failure" ]; then
+            echo "::error::Firefox store submission failed"
+            exit 1
+          fi
+
+      - name: First Release Summary
+        if: ${{ steps.detect.outputs.first == 'true' && !inputs.dryRun }}
+        run: |
+          echo "### First Release Complete" >> "$GITHUB_STEP_SUMMARY"
+          echo "GitHub release **v${{ steps.version.outputs.value }}** created." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Next steps:** Submit manually to store dashboards:" >> "$GITHUB_STEP_SUMMARY"
+          echo "- [Firefox Add-ons Developer Hub](https://addons.mozilla.org/developers/)" >> "$GITHUB_STEP_SUMMARY"
