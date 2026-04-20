@@ -1,7 +1,7 @@
 {
     "name": "firefox-volumemaxxing",
     "type": "module",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Maximize (hopefully) ANY website playing audio up to 600%",
     "scripts": {
         "dev": "wxt",
@@ -17,8 +17,9 @@
     },
     "devDependencies": {
         "@antfu/eslint-config": "^8.2.0",
-        "@kernocal/validate-store": "0.1.8",
+        "@kernocal/validate-store": "0.2.0",
         "@kernocal/viteshot": "0.1.4",
+        "@sveltejs/vite-plugin-svelte": "^7.0.0",
         "@tsconfig/svelte": "^5.0.8",
         "@unocss/eslint-plugin": "^66.6.8",
         "@webext-core/match-patterns": "^1.0.3",
