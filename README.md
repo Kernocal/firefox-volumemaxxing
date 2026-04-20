@@ -10,11 +10,12 @@
 Why another volume booster? Firefox doesn't support capturing tab audio as aggressively as Chromium does. As a result other booster extensions often break on:
 - DRM content
 - websites doing aggressive stuff like messing with captureStream()
-- audio loaded through Web Audio API
-- audio loaded dynamically through Media Source API
-- audio loaded using Audio() constructor
-- audio loaded using WebRTC AudioTrack
-- probably AudioWorklet in the future
+- dynamic audio through
+    - Web Audio API
+    - Media Source API
+    - Audio() constructor
+    - WebRTC AudioTrack
+    - probably AudioWorklet in the future
 
 This extension tries to overcome most of these issues.
 
@@ -32,6 +33,11 @@ pnpm run build
 go to about:debugging#/runtime/this-firefox (enable developer mode)
 
 Load Temporary Add-on... extension-folder/.output/firefox-mv3
+
+or
+
+pnpm run zip
+
 ```
 
 
