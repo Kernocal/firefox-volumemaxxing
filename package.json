@@ -1,5 +1,5 @@
 {
-    "name": "firefox-volumemaxxing",
+    "name": "volumemaxxing",
     "type": "module",
     "version": "0.1.1",
     "description": "Maximize (hopefully) ANY website playing audio up to 600%",

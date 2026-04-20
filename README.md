@@ -30,13 +30,17 @@ pnpm install
 
 pnpm run build
 
-go to about:debugging#/runtime/this-firefox (enable developer mode)
+go to about:debugging#/runtime/this-firefox
 
 Load Temporary Add-on... extension-folder/.output/firefox-mv3
 
 or
 
 pnpm run zip
+
+go to about:addons
+
+Settings (gear icon) -> Install Add-on From File... -> extension-folder/.output/volumemaxxing-<whatever-version>-firefox.zip
 
 ```
 
