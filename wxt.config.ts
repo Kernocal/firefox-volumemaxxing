@@ -10,6 +10,17 @@ export default defineConfig({
             'tabs',
             'storage',
         ],
+        browser_specific_settings: {
+            gecko: {
+                id: 'volumemaxxing@kernocal',
+                data_collection_permissions: {
+                    required: ['none'],
+                },
+            },
+        },
+    },
+    zip: {
+        excludeSources: ['store/**'],
     },
     manifestVersion: 3,
     srcDir: 'src',
