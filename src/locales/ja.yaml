@@ -1,0 +1,8 @@
+extension:
+    name: "Volumemaxxing"
+    description: "(うまくいけば) オーディオを再生しているあらゆるウェブサイトを最大600%まで拡大します"
+popup:
+    noActiveTab: "アクティブなタブがありません"
+    volumeLabel: "音量"
+    stopButton: "停止"
+    requestWebsite: "GitHubでウェブサイトのサポートをリクエストする"

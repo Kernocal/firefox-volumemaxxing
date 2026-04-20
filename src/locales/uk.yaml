@@ -1,0 +1,8 @@
+extension:
+    name: "Volumemaxxing"
+    description: "Максимізуйте (сподіваємось) БУДЬ-ЯКИЙ веб-сайт, що відтворює звук, до 600%"
+popup:
+    noActiveTab: "Немає активної вкладки"
+    volumeLabel: "Гучність"
+    stopButton: "Стоп"
+    requestWebsite: "Запит на підтримку сайту на GitHub"

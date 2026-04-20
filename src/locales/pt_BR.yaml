@@ -1,0 +1,8 @@
+extension:
+    name: "Volumemaxxing"
+    description: "Maximize (espero que sim) QUALQUER site reproduzindo áudio em até 600%"
+popup:
+    noActiveTab: "Nenhuma guia ativa"
+    volumeLabel: "Volume"
+    stopButton: "Parar"
+    requestWebsite: "Solicitar suporte a sites no GitHub"

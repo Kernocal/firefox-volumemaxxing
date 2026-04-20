@@ -1,0 +1,8 @@
+extension:
+    name: "Volumemaxxing"
+    description: "（希望如此）将播放音频的任何网站的音量最大化至 600%"
+popup:
+    noActiveTab: "没有活动标签页"
+    volumeLabel: "音量"
+    stopButton: "停止"
+    requestWebsite: "在 GitHub 上请求网站支持"
