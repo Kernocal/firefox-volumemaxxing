@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload Release Assets
         if: ${{ !inputs.dryRun }}
-        run: gh release upload "v${{ steps.version.outputs.value }}" .output/*.zip
+        run: gh release upload "v${{ steps.version.outputs.value }}" .output/*-firefox.zip
         env:
           GH_TOKEN: ${{ github.token }}
 
